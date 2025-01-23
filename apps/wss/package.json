@@ -1,0 +1,19 @@
+{
+  "name": "wss",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node ./src/server.js",
+    "start": "node ./src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@repo/backend-common": "workspace:*",
+    "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

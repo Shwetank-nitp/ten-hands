@@ -1,0 +1,16 @@
+{
+  "name": "@repo/backend-common",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./config": "./config/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
