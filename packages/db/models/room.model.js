@@ -2,6 +2,11 @@ import mongoose, { Schema, model } from "mongoose";
 
 const roomSchema = new Schema(
   {
+    roomName: {
+      type: String,
+      require: true,
+      unique: true,
+    },
     roomId: {
       type: Number,
       required: true,

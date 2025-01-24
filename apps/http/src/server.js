@@ -16,6 +16,7 @@ import { connectDb } from "@repo/db/connectDb";
 import { User } from "@repo/db/models/user";
 import { Room } from "@repo/db/models/room";
 import { userSignupSchema, userLoginSchema } from "@repo/zod-schema/user";
+import { roomSchema } from "@repo/zod-schema/room";
 
 dotenv.config({
   path: "./.env",
@@ -41,13 +42,20 @@ app.get("/", (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
-  const payload = userSignupSchema.safeParse(req.body);
-  if (!payload.success) {
-    return res.json({ error: zodErrorMessage(payload.error) });
-  }
+  try {
+    const payload = userSignupSchema.safeParse(req.body);
+    if (!payload.success) {
+      return res.json({ error: zodErrorMessage(payload.error) });
+    }
 
-  const user = await User.create(payload.data);
-  res.send(user);
+    const user = await User.create(payload.data);
+    res.send(user);
+  } catch (error) {
+    if (error?.code === 11000) {
+      res.status(400).json({ error: "User already exists" });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.post("/login", async (req, res) => {
@@ -73,6 +81,14 @@ app.post("/login", async (req, res) => {
 
 app.post("/create-room", decodeToken, async (req, res) => {
   const { userId } = req.userId;
+  req.headers.authorization;
+
+  const payload = roomSchema.safeParse(req.body);
+  if (!payload.success) {
+    return res.status(400).json({ error: zodErrorMessage(payload.error) });
+  }
+  const { roomName } = payload.data;
+
   const release = await mutex.acquire();
   try {
     const totalDocs = await Room.countDocuments();
@@ -81,11 +97,16 @@ app.post("/create-room", decodeToken, async (req, res) => {
     const room = await Room.create({
       adminId: userId,
       roomId,
+      roomName,
     });
 
-    res.send(room);
+    res.send({
+      roomId: room.roomId,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    if (error?.code === 11000) {
+      res.status(400).json({ error: "room with this name already exists" });
+    } else res.status(500).json({ error: "Internal Server Error" });
   } finally {
     release();
   }

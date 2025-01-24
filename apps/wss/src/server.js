@@ -1,5 +1,9 @@
+// pnpm packages
 import { WebSocketServer } from "ws";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+
+// worksapce packages
 import { JWT_SECRET } from "@repo/backend-common/config";
 
 dotenv.config({
@@ -9,10 +13,9 @@ dotenv.config({
 const wss = new WebSocketServer({ port: process.env.PORT });
 
 wss.on("connection", (ws, req) => {
-  console.log("Client connected");
-
-  const url = new URL(req.url);
-  const token = url.searchParams.get("token");
+  const params = req.url.split("?")[1];
+  const searchParms = new URLSearchParams(params);
+  const token = searchParms.get("token");
 
   if (!token) {
     ws.close();
