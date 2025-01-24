@@ -22,12 +22,14 @@ wss.on("connection", (ws, req) => {
     return;
   }
 
-  // delete this from the production
-  console.log(JWT_SECRET);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
 
-  const decoded = jwt.verify(token, JWT_SECRET);
-
-  if (!decoded || !decoded.userId) {
+    if (!decoded || !decoded.userId) {
+      ws.close();
+      return;
+    }
+  } catch (error) {
     ws.close();
     return;
   }
