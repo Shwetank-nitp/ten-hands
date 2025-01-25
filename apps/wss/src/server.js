@@ -44,6 +44,15 @@ wss.on("connection", (ws, req) => {
     return;
   }
 
+  ws.on("close", () => {
+    const index = connectedUserRoomWs.findIndex(
+      (item) => item.userId === authUserId
+    );
+    if (index !== -1) {
+      connectedUserRoomWs.splice(index, 1); // Remove the user from the array
+    }
+  });
+
   ws.on("message", async (message) => {
     const request = JSON.parse(message);
     const payload = wsRequestSchema.safeParse(request);

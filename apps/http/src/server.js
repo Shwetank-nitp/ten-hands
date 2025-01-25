@@ -146,7 +146,7 @@ app.get("/chats/:roomId", decodeToken, async (req, res) => {
       $skip: skip || 0,
     },
     {
-      $limit: limit || 50,
+      $limit: limit || 5,
     },
   ]);
 
