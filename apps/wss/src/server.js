@@ -1,10 +1,11 @@
 // pnpm packages
 import { WebSocketServer } from "ws";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
+
+//utils
+import { checkToken } from "./utils/check-token.js";
 
 // worksapce packages
-import { JWT_SECRET } from "@repo/backend-common/config";
 import { wsRequestSchema } from "@repo/zod-schema/ws";
 import { Chat } from "@repo/db/models/chat";
 import { connectDb } from "@repo/db/connectDb";
@@ -29,15 +30,16 @@ wss.on("connection", (ws, req) => {
     return;
   }
 
-  let decoded;
+  // check user authentication to guard the websocket server.
+  let authUserId;
 
   try {
-    decoded = jwt.verify(token, JWT_SECRET);
-    if (!decoded || !decoded.userId) {
+    authUserId = checkToken(token);
+    if (!authUserId) {
       ws.close();
       return;
     }
-  } catch (error) {
+  } catch {
     ws.close();
     return;
   }
@@ -55,11 +57,11 @@ wss.on("connection", (ws, req) => {
 
     if (type === "sub_room") {
       const index = connectedUserRoomWs.findIndex(
-        (item) => item.userId === decoded.userId
+        (item) => item.userId === authUserId
       );
       if (index === -1) {
         connectedUserRoomWs.push({
-          userId: decoded.userId,
+          userId: authUserId,
           roomIds: [roomId],
           ws,
         });
@@ -74,7 +76,7 @@ wss.on("connection", (ws, req) => {
 
     if (type === "unsub_room") {
       const index = connectedUserRoomWs.findIndex(
-        (item) => item.userId === decoded.userId
+        (item) => item.userId === authUserId
       );
       if (
         index === -1 ||
@@ -93,7 +95,7 @@ wss.on("connection", (ws, req) => {
     if (type === "chat" && payload.data?.message) {
       await Chat.create({
         roomId,
-        userId: decoded.userId,
+        userId: authUserId,
         message: payload.data.message,
       });
       connectedUserRoomWs.forEach((item) => {
