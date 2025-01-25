@@ -9,7 +9,8 @@
   },
   "exports": {
     "./user": "./user/_schema.js",
-    "./room": "./room/_schema.js"
+    "./room": "./room/_schema.js",
+    "./ws": "./ws/_schema.js"
   },
   "keywords": [],
   "author": "",

@@ -17,6 +17,7 @@ import { User } from "@repo/db/models/user";
 import { Room } from "@repo/db/models/room";
 import { userSignupSchema, userLoginSchema } from "@repo/zod-schema/user";
 import { roomSchema } from "@repo/zod-schema/room";
+import { Chat } from "@repo/db/models/chat";
 
 dotenv.config({
   path: "./.env",
@@ -110,6 +111,46 @@ app.post("/create-room", decodeToken, async (req, res) => {
   } finally {
     release();
   }
+});
+
+app.get("/chats/:roomId", decodeToken, async (req, res) => {
+  const { roomId } = req.params;
+  if (!Number(roomId)) {
+    res
+      .json({
+        error:
+          "roomId must be a number or string with with only numberical digits",
+      })
+      .status(401);
+    return;
+  }
+
+  const paramsString = req.url.split("?")[1];
+  const searchParams = new URLSearchParams(paramsString);
+
+  const limit = Number(searchParams.get("limit"));
+  const skip = Number(searchParams.get("skip"));
+
+  const chats = await Chat.aggregate([
+    {
+      $match: {
+        roomId: Number(roomId),
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    {
+      $skip: skip || 0,
+    },
+    {
+      $limit: limit || 50,
+    },
+  ]);
+
+  res.send(chats);
 });
 
 app.listen(process.env.PORT, () => {

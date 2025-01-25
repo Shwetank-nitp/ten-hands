@@ -81,6 +81,12 @@ importers:
       '@repo/backend-common':
         specifier: workspace:*
         version: link:../../packages/backend-common
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@repo/zod-schema':
+        specifier: workspace:*
+        version: link:../../packages/zod-schema
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
