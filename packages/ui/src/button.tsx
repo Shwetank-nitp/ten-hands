@@ -1,16 +1,21 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ButtonHTMLAttributes, ReactNode } from "react";
 
-interface ButtonProps {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   className?: string;
   onClick?: () => void;
 }
 
-export const Button = ({ children, className, onClick }: ButtonProps) => {
+export const Button = ({
+  children,
+  className,
+  onClick,
+  ...props
+}: ButtonProps) => {
   return (
-    <button className={className} onClick={onClick}>
+    <button className={className} {...props} onClick={onClick}>
       {children}
     </button>
   );

@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { Mutex } from "async-mutex";
+import cors from "cors";
 
 // Middleware
 import { decodeToken } from "./middlewares/token-decode.js";
@@ -37,6 +38,14 @@ const mutex = new Mutex();
 const app = express();
 
 app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.FRONTEND,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
@@ -60,24 +69,29 @@ app.post("/signup", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const payload = userLoginSchema.safeParse(req.body);
-  if (!payload.success) {
-    return res.status(400).json({ error: zodErrorMessage(payload.error) });
+  try {
+    const payload = userLoginSchema.safeParse(req.body);
+    if (!payload.success) {
+      return res.status(400).json({ error: zodErrorMessage(payload.error) });
+    }
+
+    const user = await User.findOne({ username: payload.data.username });
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    const isPasswordCorrect = payload.data.password === user.password;
+
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ error: "Invalid password" });
+    }
+
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET);
+    res.send(token);
+  } catch (error) {
+    console.log(error);
+    res.json({ error: "internal server error" }).status(500);
   }
-
-  const user = await User.findOne({ username: payload.data.username });
-  if (!user) {
-    return res.status(400).json({ error: "User not found" });
-  }
-
-  const isPasswordCorrect = payload.data.password === user.password;
-
-  if (!isPasswordCorrect) {
-    return res.status(400).json({ error: "Invalid password" });
-  }
-
-  const token = jwt.sign({ userId: user._id }, JWT_SECRET);
-  res.send(token);
 });
 
 app.post("/create-room", decodeToken, async (req, res) => {
