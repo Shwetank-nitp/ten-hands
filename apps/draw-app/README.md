@@ -27,7 +27,7 @@ Before running the app locally, ensure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (for backend and package management)
 - [Git](https://git-scm.com/) (to clone the repo)
-- [Pnpm](hhttps://pnpm.io/installation) (package manager)
+- [Pnpm](https://pnpm.io/installation) (package manager)
 
 ### Clone the Repository 📂
 
