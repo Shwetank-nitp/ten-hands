@@ -5,13 +5,30 @@ import { Pencil } from "lucide-react";
 import Comets from "./Comets";
 import { Button } from "@repo/ui/button";
 import { useRouter } from "next/navigation";
+import { AnimateComits } from "@/utils/canvas/AnimateComits";
+import { useEffect, useRef, useState } from "react";
+import CommitToggle from "./ui/comitToggle";
 
 export function Hero() {
   const router = useRouter();
+  const [on, setOn] = useState(true);
+  const animateComitRef = useRef<AnimateComits | null>(null);
+
+  useEffect(() => {
+    if (on && animateComitRef.current) {
+      animateComitRef.current.start();
+    } else if (animateComitRef.current) {
+      animateComitRef.current.stop();
+    }
+  }, [on]);
+
   return (
     <section className="overflow-hidden relative">
+      <div className="absolute top-5 right-5 z-50">
+        <CommitToggle onClick={() => setOn(!on)} state={on} />
+      </div>
       <div className="absolute top-0 left-0 -z-10">
-        <Comets />
+        <Comets animateComitRef={animateComitRef} />
       </div>
       <motion.div
         initial={{
@@ -53,7 +70,10 @@ export function Hero() {
             Get Started
           </Button>
           <Button className="bg-gray-100 min-w-[8rem] hover:bg-gray-200 rounded-md py-2 px-3 text-sm">
-            <a href="https://github.com/Shwetank-nitp/" target="_blank">
+            <a
+              href="https://github.com/Shwetank-nitp/ten-hands"
+              target="_blank"
+            >
               View Code
             </a>
           </Button>

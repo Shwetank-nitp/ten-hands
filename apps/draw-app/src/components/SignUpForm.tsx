@@ -1,23 +1,18 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { Button } from "@repo/ui/button";
-import axios from "axios";
-import { User, Lock } from "lucide-react";
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { HTTP_URL } from "../utils/configs/urls";
-import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { AuthContainer } from "./AuthContainer";
 import { Label } from "./ui/label";
+import { Crosshair, Lock, User } from "lucide-react";
 import { AuthInputField } from "./ui/input";
+import { Button } from "@repo/ui/button";
+import Link from "next/link";
 
-// Define the schema for form validation
-const loginSchema = z.object({
+const signupSchema = z.object({
   username: z
     .string()
     .min(1, "Username is required")
@@ -26,54 +21,77 @@ const loginSchema = z.object({
     .string()
     .min(1, "Password is required")
     .max(100, "Password must be less than 100 characters"),
+  name: z
+    .string()
+    .min(1, "name is reuqired")
+    .max(50, "Name must be less then 50 characters"),
 });
 
-type LoginSchemaType = z.infer<typeof loginSchema>;
+type SignupSchemaType = z.infer<typeof signupSchema>;
 
-export function LoginForm() {
+export const SignUpForm = () => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginSchemaType>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { username: "", password: "" },
+  } = useForm<SignupSchemaType>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { username: "", password: "", name: "" },
   });
 
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data: LoginSchemaType) => {
+  const onSubmit = async (data: SignupSchemaType) => {
     setLoading(true);
     try {
-      const res = await axios.post(`${HTTP_URL}/login`, data);
-
-      console.log(res.data); //delte this
-      Cookies.set("token", res.data); //set the cookie
-      router.replace("/room");
+      setTimeout(() => {
+        setLoading(false);
+        console.log(data);
+      }, 1000);
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      setLoading(false);
+      //setLoading(false);
     }
   };
 
   return (
     <AuthContainer>
       <Label>
-        <User size={15} /> User Login
+        <User size={15} /> User Signup
       </Label>
       <div className="mt-4 mb-10">
         <span className="text-3xl font-bold text-slate-800 text-center block">
           Welcome to Excelledraw
         </span>
         <p className="text-center text-gray-400 mt-2">
-          Welcome back, we are waiting for you 👉👈
+          We welcome you to our platform, and we hope you will love it! 😍❤️
         </p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <fieldset disabled={loading} className="flex flex-col gap-4">
+          <div>
+            <div className="relative">
+              <AuthInputField
+                control={control}
+                errors={errors}
+                type="text"
+                placeholder="name"
+                aria-invalid={!!errors.name}
+                name="name"
+              />
+              <Crosshair
+                size={18}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                aria-label="name icon"
+              />
+            </div>
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
           <div>
             <div className="relative">
               <AuthInputField
@@ -141,9 +159,9 @@ export function LoginForm() {
       </form>
       <div className="flex justify-center items-center">
         <span className="text-sm mx-auto mt-4 text-gray-500">
-          New User? Please <Link href="/signup">Signup</Link> first
+          Alrady have an account? Please <Link href="/login">Login</Link>
         </span>
       </div>
     </AuthContainer>
   );
-}
+};
