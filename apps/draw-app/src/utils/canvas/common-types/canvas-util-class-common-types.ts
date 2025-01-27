@@ -5,9 +5,26 @@ export type RectParams = {
   h: number;
 };
 
+export type OvelParams = {
+  x: number;
+  y: number;
+  radiusX: number;
+  radiusY: number;
+  rotation: number;
+  endAngle: number;
+  startAngle: number;
+};
+
+export type LineParams = {
+  stx: number;
+  sty: number;
+  enx: number;
+  eny: number;
+}[];
+
 export type Shape = {
-  type: "rect" | "circle" | "line"; //etc..
-  params: RectParams; //add more sahpe params type later
+  type: "rect" | "oval" | "line"; //etc..
+  params: RectParams | OvelParams | LineParams; //add more sahpe params type later
 };
 
 export type comitEntity = {

@@ -18,7 +18,7 @@ export default function Canvas() {
     const manager = new EntintyManager();
     const painter = new Painter(ctx, canvas, manager);
 
-    painter.startObserving();
+    painter.startObserving("line");
   }, []);
 
   return (

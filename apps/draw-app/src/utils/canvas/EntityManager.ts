@@ -11,6 +11,7 @@ export class EntintyManager {
   addEntity(params: Shape) {
     const size = this.entintyMap.size;
     this.entintyMap.set(size, params);
+    return size;
   }
 
   getEntentys() {
