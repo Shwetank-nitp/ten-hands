@@ -93,9 +93,15 @@ class Line {
 }
 
 export class Painter {
-  private ctx;
-  private manager;
-  private canvas;
+  private ctx: CanvasRenderingContext2D;
+  private manager: EntintyManager;
+  private canvas: HTMLCanvasElement;
+
+  // Store event listeners so they can be removed later
+  private mouseDownListener: ((e: MouseEvent) => void) | null = null;
+  private mouseUpListener: ((e: MouseEvent) => void) | null = null;
+  private mouseMoveListener: ((e: MouseEvent) => void) | null = null;
+  private resizeListener: (() => void) | null = null;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -111,13 +117,13 @@ export class Painter {
     let clicked = false;
     const rect = new Rect();
 
-    const mouseDownEvent = (e: MouseEvent) => {
+    this.mouseDownListener = (e: MouseEvent) => {
       clicked = true;
       rect.x = e.clientX;
       rect.y = e.clientY;
     };
 
-    const mouseUpEvent = () => {
+    this.mouseUpListener = () => {
       clicked = false;
       this.manager.addEntity({ type: "rect", params: rect.getParams() });
       this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -125,7 +131,7 @@ export class Painter {
       rect.resetParams();
     };
 
-    const mouseMoveEvent = (e: MouseEvent) => {
+    this.mouseMoveListener = (e: MouseEvent) => {
       if (clicked) {
         rect.w = e.clientX - rect.x;
         rect.h = e.clientY - rect.y;
@@ -135,23 +141,23 @@ export class Painter {
       }
     };
 
-    this.canvas.addEventListener("mousedown", mouseDownEvent);
-    this.canvas.addEventListener("mouseup", mouseUpEvent);
-    this.canvas.addEventListener("mouseleave", mouseUpEvent);
-    this.canvas.addEventListener("mousemove", mouseMoveEvent);
+    this.canvas.addEventListener("mousedown", this.mouseDownListener);
+    this.canvas.addEventListener("mouseup", this.mouseUpListener);
+    this.canvas.addEventListener("mouseleave", this.mouseUpListener);
+    this.canvas.addEventListener("mousemove", this.mouseMoveListener);
   }
 
   observeOval() {
     let clicked = false;
     const oval = new Oval();
 
-    const mouseDownEvent = (e: MouseEvent) => {
+    this.mouseDownListener = (e: MouseEvent) => {
       clicked = true;
       oval.x = e.clientX;
       oval.y = e.clientY;
     };
 
-    const mouseUpEvent = () => {
+    this.mouseUpListener = () => {
       clicked = false;
       this.manager.addEntity({ type: "oval", params: oval.getParams() });
       this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -159,17 +165,12 @@ export class Painter {
       oval.resetParams();
     };
 
-    const mouseMoveEvent = (e: MouseEvent) => {
+    this.mouseMoveListener = (e: MouseEvent) => {
       if (clicked) {
-        // Calculate radiusX and radiusY based on mouse position
         oval.radiusX = Math.abs(e.clientX - oval.x) / 1.25;
         oval.radiusY = Math.abs(e.clientY - oval.y) / 1.25;
-
-        // Clear the canvas and redraw all shapes
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.paintAll();
-
-        // Draw the current oval being dragged
         this.ctx.beginPath();
         this.ctx.ellipse(
           oval.x,
@@ -186,78 +187,65 @@ export class Painter {
       }
     };
 
-    this.canvas.addEventListener("mousedown", mouseDownEvent);
-    this.canvas.addEventListener("mouseup", mouseUpEvent);
-    this.canvas.addEventListener("mouseleave", mouseUpEvent);
-    this.canvas.addEventListener("mousemove", mouseMoveEvent);
+    this.canvas.addEventListener("mousedown", this.mouseDownListener);
+    this.canvas.addEventListener("mouseup", this.mouseUpListener);
+    this.canvas.addEventListener("mouseleave", this.mouseUpListener);
+    this.canvas.addEventListener("mousemove", this.mouseMoveListener);
   }
 
   observeLine() {
     let clicked = false;
     const line = new Line();
 
-    const mouseDownEvent = (e: MouseEvent) => {
+    this.mouseDownListener = (e: MouseEvent) => {
       clicked = true;
-      // Initialize the first segment of the line
       line.collection.push({
         stx: e.clientX,
         sty: e.clientY,
         enx: e.clientX,
         eny: e.clientY,
       });
-
-      // Start the path for freehand drawing
       this.ctx.beginPath();
       this.ctx.moveTo(e.clientX, e.clientY);
     };
 
-    const mouseUpEvent = () => {
+    this.mouseUpListener = () => {
       if (clicked) {
         clicked = false;
-
-        // Store the completed line in the manager
         this.manager.addEntity({
           type: "line",
           params: line.getParams(),
         });
-
-        // Clear and repaint everything
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.paintAll();
       }
     };
 
-    const mouseMoveEvent = (e: MouseEvent) => {
+    this.mouseMoveListener = (e: MouseEvent) => {
       if (clicked) {
-        // Get the current mouse position
         const currentSegment = {
           stx: line.collection[line.collection.length - 1].enx,
           sty: line.collection[line.collection.length - 1].eny,
           enx: e.clientX,
           eny: e.clientY,
         };
-
-        // Push the segment to the collection
         line.collection.push(currentSegment);
-
-        // Draw the current segment
         this.ctx.lineTo(currentSegment.enx, currentSegment.eny);
-        this.ctx.strokeStyle = "white"; // Set the stroke style for the line
+        this.ctx.strokeStyle = "white";
         this.ctx.stroke();
       }
     };
 
-    this.canvas.addEventListener("mousedown", mouseDownEvent);
-    this.canvas.addEventListener("mouseup", mouseUpEvent);
-    this.canvas.addEventListener("mouseleave", mouseUpEvent);
-    this.canvas.addEventListener("mousemove", mouseMoveEvent);
+    this.canvas.addEventListener("mousedown", this.mouseDownListener);
+    this.canvas.addEventListener("mouseup", this.mouseUpListener);
+    this.canvas.addEventListener("mouseleave", this.mouseUpListener);
+    this.canvas.addEventListener("mousemove", this.mouseMoveListener);
   }
 
-  // remove the resize listment from this class what the hell
   startObserving(type: "rect" | "ovel" | "line") {
     this.paintAll();
 
-    const handleResize = () => {
+    this.resizeListener = () => {
       this.canvas.width = window.innerWidth;
       this.canvas.height = window.innerHeight;
       this.paintAll();
@@ -271,12 +259,35 @@ export class Painter {
       this.observeLine();
     }
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", this.resizeListener);
+  }
+
+  stopObserving() {
+    if (this.mouseDownListener) {
+      this.canvas.removeEventListener("mousedown", this.mouseDownListener);
+    }
+    if (this.mouseUpListener) {
+      this.canvas.removeEventListener("mouseup", this.mouseUpListener);
+      this.canvas.removeEventListener("mouseleave", this.mouseUpListener);
+    }
+    if (this.mouseMoveListener) {
+      this.canvas.removeEventListener("mousemove", this.mouseMoveListener);
+    }
+
+    if (this.resizeListener) {
+      window.removeEventListener("resize", this.resizeListener);
+    }
+
+    // Reset listener references
+    this.mouseDownListener = null;
+    this.mouseUpListener = null;
+    this.mouseMoveListener = null;
+    this.resizeListener = null;
   }
 
   private draw(shape: Shape) {
     if (shape.type === "rect") {
-      this.ctx.strokeStyle = "white"; // change it later for diffrent color.
+      this.ctx.strokeStyle = "white";
       const { x, y, w, h } = shape.params as RectParams;
       this.ctx.strokeRect(x, y, w, h);
     }
