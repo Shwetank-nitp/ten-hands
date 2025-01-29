@@ -62,6 +62,8 @@ export function Hero() {
         </div>
         <div className="flex gap-4">
           <Button
+            variant="primary"
+            size="large"
             onClick={() => {
               router.push("/login");
             }}
@@ -69,14 +71,15 @@ export function Hero() {
           >
             Get Started
           </Button>
-          <Button className="bg-gray-100 min-w-[8rem] hover:bg-gray-200 rounded-md py-2 px-3 text-sm">
-            <a
-              href="https://github.com/Shwetank-nitp/ten-hands"
-              target="_blank"
+          <a href="https://github.com/Shwetank-nitp/ten-hands" target="_blank">
+            <Button
+              size="large"
+              variant="secondary"
+              className="bg-gray-100 min-w-[8rem] hover:bg-gray-200 rounded-md py-2 px-3 text-sm"
             >
               View Code
-            </a>
-          </Button>
+            </Button>
+          </a>
         </div>
       </motion.div>
     </section>

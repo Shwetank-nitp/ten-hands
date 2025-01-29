@@ -96,21 +96,25 @@ export class Painter {
   private ctx: CanvasRenderingContext2D;
   private manager: EntintyManager;
   private canvas: HTMLCanvasElement;
+  private color: string;
 
   // Store event listeners so they can be removed later
   private mouseDownListener: ((e: MouseEvent) => void) | null = null;
   private mouseUpListener: ((e: MouseEvent) => void) | null = null;
   private mouseMoveListener: ((e: MouseEvent) => void) | null = null;
   private resizeListener: (() => void) | null = null;
+  private keyDownListener: ((e: KeyboardEvent) => void) | null = null;
 
   constructor(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
-    manager: EntintyManager
+    manager: EntintyManager,
+    color: string
   ) {
     this.ctx = ctx;
     this.manager = manager;
     this.canvas = canvas;
+    this.color = color;
   }
 
   observeRect() {
@@ -125,7 +129,11 @@ export class Painter {
 
     this.mouseUpListener = () => {
       clicked = false;
-      this.manager.addEntity({ type: "rect", params: rect.getParams() });
+      this.manager.addEntity({
+        type: "rect",
+        params: rect.getParams(),
+        color: this.color,
+      });
       this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       this.paintAll();
       rect.resetParams();
@@ -137,6 +145,7 @@ export class Painter {
         rect.h = e.clientY - rect.y;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.paintAll();
+        this.ctx.strokeStyle = this.color;
         this.ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
       }
     };
@@ -159,7 +168,11 @@ export class Painter {
 
     this.mouseUpListener = () => {
       clicked = false;
-      this.manager.addEntity({ type: "oval", params: oval.getParams() });
+      this.manager.addEntity({
+        type: "oval",
+        params: oval.getParams(),
+        color: this.color,
+      });
       this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       this.paintAll();
       oval.resetParams();
@@ -181,7 +194,7 @@ export class Painter {
           oval.startAngle,
           oval.endAngle
         );
-        this.ctx.strokeStyle = "white";
+        this.ctx.strokeStyle = this.color;
         this.ctx.stroke();
         this.ctx.closePath();
       }
@@ -215,8 +228,10 @@ export class Painter {
         this.manager.addEntity({
           type: "line",
           params: line.getParams(),
+          color: this.color,
         });
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        line.resetParams();
         this.paintAll();
       }
     };
@@ -231,7 +246,7 @@ export class Painter {
         };
         line.collection.push(currentSegment);
         this.ctx.lineTo(currentSegment.enx, currentSegment.eny);
-        this.ctx.strokeStyle = "white";
+        this.ctx.strokeStyle = this.color;
         this.ctx.stroke();
       }
     };
@@ -259,7 +274,20 @@ export class Painter {
       this.observeLine();
     }
 
+    this.keyDownListener = (e) => {
+      if (e.key === "z" && e.ctrlKey) {
+        this.manager.undo();
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.paintAll();
+      } else if (e.key === "y" && e.ctrlKey) {
+        this.manager.redo();
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.paintAll();
+      }
+    };
+
     window.addEventListener("resize", this.resizeListener);
+    window.addEventListener("keydown", this.keyDownListener);
   }
 
   stopObserving() {
@@ -278,22 +306,27 @@ export class Painter {
       window.removeEventListener("resize", this.resizeListener);
     }
 
+    if (this.keyDownListener) {
+      window.removeEventListener("keydown", this.keyDownListener);
+    }
+
     // Reset listener references
     this.mouseDownListener = null;
     this.mouseUpListener = null;
     this.mouseMoveListener = null;
     this.resizeListener = null;
+    this.keyDownListener = null;
   }
 
   private draw(shape: Shape) {
     if (shape.type === "rect") {
-      this.ctx.strokeStyle = "white";
+      this.ctx.strokeStyle = shape.color;
       const { x, y, w, h } = shape.params as RectParams;
       this.ctx.strokeRect(x, y, w, h);
     }
 
     if (shape.type === "oval") {
-      this.ctx.strokeStyle = "white";
+      this.ctx.strokeStyle = shape.color;
       const { x, y, radiusX, radiusY, rotation, startAngle, endAngle } =
         shape.params as OvelParams;
       this.ctx.beginPath();
@@ -306,7 +339,7 @@ export class Painter {
       const collection = shape.params as LineParams;
       collection.forEach((line) => {
         this.ctx.beginPath();
-        this.ctx.strokeStyle = "white";
+        this.ctx.strokeStyle = shape.color;
         this.ctx.moveTo(line.stx, line.sty);
         this.ctx.lineTo(line.enx, line.eny);
         this.ctx.stroke();

@@ -1,27 +1,50 @@
-import { type JSX } from "react";
+import { HTMLAttributes, ReactNode } from "react";
 
-export function Card({
-  className,
-  title,
+export const CardInfo = ({
   children,
-  href,
+  className = "",
 }: {
+  children: ReactNode;
   className?: string;
-  title: string;
-  children: React.ReactNode;
-  href: string;
-}): JSX.Element {
+}) => {
   return (
-    <a
-      className={className}
-      href={`${href}?utm_source=create-turbo&utm_medium=basic&utm_campaign=create-turbo"`}
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      <h2>
-        {title} <span>-&gt;</span>
-      </h2>
-      <p>{children}</p>
-    </a>
+    <div className={"text-xs text-gray-500" + " " + className}>{children}</div>
   );
-}
+};
+
+export const CardTitle = ({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div
+      style={{ fontSize: "2rem" }}
+      className={"font-bold tracking-tighter" + " " + className}
+    >
+      {children}
+    </div>
+  );
+};
+
+export const Card = ({
+  children,
+  className = "",
+  ...props
+}: {
+  children: ReactNode;
+  className?: string;
+} & HTMLAttributes<HTMLDivElement>) => {
+  return (
+    <div
+      {...props}
+      className={
+        "border p-4 rounded-md flex flex-col bg-white" + " " + className
+      }
+    >
+      {children}
+    </div>
+  );
+};

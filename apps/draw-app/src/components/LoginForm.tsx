@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -48,9 +47,7 @@ export function LoginForm() {
     setLoading(true);
     try {
       const res = await axios.post(`${HTTP_URL}/login`, data);
-
-      console.log(res.data); //delte this
-      Cookies.set("token", res.data); //set the cookie
+      Cookies.set("token", res.data);
       router.replace("/room");
     } catch (error) {
       console.error("Error:", error);

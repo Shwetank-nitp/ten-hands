@@ -25,6 +25,7 @@ export type LineParams = {
 export type Shape = {
   type: "rect" | "oval" | "line"; //etc..
   params: RectParams | OvelParams | LineParams; //add more sahpe params type later
+  color: string;
 };
 
 export type comitEntity = {

@@ -19,6 +19,7 @@ import { Room } from "@repo/db/models/room";
 import { userSignupSchema, userLoginSchema } from "@repo/zod-schema/user";
 import { roomSchema } from "@repo/zod-schema/room";
 import { Chat } from "@repo/db/models/chat";
+import mongoose from "mongoose";
 
 dotenv.config({
   path: "./.env",
@@ -96,18 +97,27 @@ app.post("/login", async (req, res) => {
 
 app.post("/create-room", decodeToken, async (req, res) => {
   const { userId } = req.userId;
-  req.headers.authorization;
-
   const payload = roomSchema.safeParse(req.body);
+
   if (!payload.success) {
-    return res.status(400).json({ error: zodErrorMessage(payload.error) });
+    return res.status(400).json({ error: payload.error.errors });
   }
+
   const { roomName } = payload.data;
 
   const release = await mutex.acquire();
   try {
-    const totalDocs = await Room.countDocuments();
-    const roomId = totalDocs + 1;
+    const query = await Room.aggregate([
+      {
+        $group: {
+          _id: null,
+          maxId: { $max: "$roomId" },
+        },
+      },
+    ]);
+
+    const maxId = query.length > 0 ? query[0].maxId : 0;
+    const roomId = maxId + 1;
 
     const room = await Room.create({
       adminId: userId,
@@ -115,16 +125,43 @@ app.post("/create-room", decodeToken, async (req, res) => {
       roomName,
     });
 
-    res.send({
+    res.status(201).json({
       roomId: room.roomId,
     });
   } catch (error) {
     if (error?.code === 11000) {
-      res.status(400).json({ error: "room with this name already exists" });
-    } else res.status(500).json({ error: "Internal Server Error" });
+      console.error("Duplicate room name:", error);
+      res.status(400).json({ error: "A room with this name already exists." });
+    } else {
+      console.error("Internal Server Error:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   } finally {
     release();
   }
+});
+app.get("/rooms", decodeToken, async (req, res) => {
+  const { userId } = req.userId;
+  const rooms = await Room.aggregate(
+    [
+      {
+        $match: {
+          adminId: new mongoose.Types.ObjectId(userId),
+        },
+      },
+    ],
+    [
+      {
+        $project: {
+          adminId: 1,
+          roomId: 1,
+          createdAt: 1,
+          roomName: 1,
+        },
+      },
+    ]
+  );
+  res.send(rooms);
 });
 
 app.get("/chats/:roomId", decodeToken, async (req, res) => {
