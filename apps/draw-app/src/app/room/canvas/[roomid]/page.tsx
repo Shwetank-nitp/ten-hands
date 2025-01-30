@@ -3,6 +3,7 @@
 import { ToolBar } from "@/components/ToolBar";
 import { EntintyManager } from "@/utils/canvas/EntityManager";
 import { Painter } from "@/utils/canvas/Painter";
+import { useSocketContext } from "@/utils/contexts/webScoketContext";
 import { Circle, PencilIcon, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -14,12 +15,19 @@ const drawOptions = [
 
 const colors = ["red", "white", "green"];
 
-const manager = new EntintyManager();
-
 export default function Canvas() {
   const [shape, setShape] = useState<"ovel" | "line" | "rect">("line");
-  const [color, setColor] = useState(colors[0]); // TODO::Later
+  const [color, setColor] = useState(colors[0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { socket, loading } = useSocketContext();
+  const [manager, setManager] = useState<EntintyManager>();
+
+  useEffect(() => {
+    if (socket && !loading) {
+      const manager = new EntintyManager(socket);
+      setManager(manager);
+    }
+  }, [socket, loading]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -31,14 +39,16 @@ export default function Canvas() {
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
 
-    // draw logic here
-    const painter = new Painter(ctx, canvas, manager, color);
+    if (manager) {
+      // draw logic here
+      const painter = new Painter(ctx, canvas, manager, color);
 
-    painter.startObserving(shape);
-    return () => {
-      painter.stopObserving();
-    };
-  }, [shape, color]);
+      painter.startObserving(shape);
+      return () => {
+        painter.stopObserving();
+      };
+    }
+  }, [shape, color, manager]);
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black">

@@ -1,17 +1,35 @@
+import { Shapes } from "lucide-react";
 import { Shape } from "./common-types/canvas-util-class-common-types";
 
 // make its methode protected
 export class EntintyManager {
   private entintyMap: Map<number, Shape>;
   private entityStack: Shape[];
-  constructor() {
+  private socket: WebSocket;
+  constructor(socket: WebSocket) {
     this.entintyMap = new Map();
     this.entityStack = [];
+    this.socket = socket;
+    socket.onmessage = (message) => {
+      const { type, color, draw } = message.data;
+      this.entintyMap.set(this.entintyMap.size, {
+        type,
+        color,
+        params: draw,
+      });
+    };
   }
 
-  addEntity(params: Shape) {
+  addEntity(data: Shape) {
     const size = this.entintyMap.size;
-    this.entintyMap.set(size, params);
+    this.entintyMap.set(size, data);
+    this.socket.send(
+      JSON.stringify({
+        type: data.type,
+        color: data.color,
+        draw: data.params,
+      })
+    );
     return size;
   }
 

@@ -4,9 +4,12 @@ import { Button } from "@repo/ui/button";
 import { motion } from "framer-motion";
 import { DoorOpen, LogIn, Plus } from "lucide-react";
 import { RoomCard } from "@/components/RoomCard";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ContentNotFound } from "./ui/204";
 import { CreateRoomCard } from "./CreateRoomCard";
+import { useSocketContext } from "@/utils/contexts/webScoketContext";
+import { useRouter } from "next/navigation";
+import { JoinRoomCard } from "./JoinRoomCard";
 
 interface RoomDashboardProps {
   rooms: {
@@ -18,9 +21,37 @@ interface RoomDashboardProps {
   }[];
 }
 
-export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
+const Dashboard = ({
+  rooms,
+  socket,
+}: RoomDashboardProps & {
+  socket: WebSocket;
+}) => {
+  const router = useRouter();
   const parentRef = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
+  const [openCreatRoom, setOpenCreatRoom] = useState(false);
+  const [openJoinRoom, setOpenJoinRoom] = useState(false);
+
+  const joinRoomHandler = (roomId: number) => {
+    socket.send(
+      JSON.stringify({
+        type: "sub_room",
+        roomId,
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (socket) {
+      const handleJoinAck = (message: MessageEvent) => {
+        const parsed = JSON.parse(message.data);
+        if (parsed.type === "sub_ack") {
+          router.push("/canvas/" + parsed.roomId);
+        }
+      };
+      socket.onmessage = handleJoinAck;
+    }
+  }, [socket]);
 
   return (
     <motion.div
@@ -29,7 +60,8 @@ export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
       transition={{ duration: 0.25, ease: "backInOut" }}
       className="h-full w-full flex flex-col relative"
     >
-      {<CreateRoomCard open={open} setOpen={setOpen} />}
+      <CreateRoomCard open={openCreatRoom} setOpen={setOpenCreatRoom} />
+      <JoinRoomCard open={openJoinRoom} setOpen={setOpenJoinRoom} />
       <div className="flex justify-between">
         <div>
           <h1 className="flex gap-2 items-center">
@@ -45,13 +77,14 @@ export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
             variant="secondary"
             size="normal"
             className="flex justify-between gap-4 items-center max-h-fit"
+            onClick={() => setOpenJoinRoom(true)}
           >
             <LogIn size={15} /> Join Room
           </Button>
           <Button
             variant="primary"
             size="normal"
-            onClick={() => setOpen(true)}
+            onClick={() => setOpenCreatRoom(true)}
             className="flex justify-between gap-4 items-center max-h-fit"
           >
             <Plus size={15} /> <span>Create a Room</span>
@@ -75,7 +108,7 @@ export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
                 key={index}
                 roomId={room.roomId.toString()}
                 roomName={room.roomName}
-                actionHandler={() => console.log("do")}
+                actionHandler={() => joinRoomHandler(room.roomId)}
                 date={stringifyDate}
                 parentRef={parentRef}
               />
@@ -86,5 +119,23 @@ export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
         )}
       </motion.div>
     </motion.div>
+  );
+};
+
+export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
+  const { socket, loading, error } = useSocketContext();
+
+  if (error) {
+    return <p>Internal server error</p>;
+  }
+
+  return (
+    <>
+      {loading ? (
+        <p>Loading</p>
+      ) : (
+        socket && <Dashboard rooms={rooms} socket={socket} />
+      )}
+    </>
   );
 };
