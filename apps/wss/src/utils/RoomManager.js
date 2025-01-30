@@ -63,7 +63,7 @@ class RoomManager {
   broadcastToRoom(roomId, message, senderId) {
     try {
       if (!this.#roomSubscriptions.has(roomId)) return;
-
+      console.log(message);
       const recipients = this.#roomSubscriptions.get(roomId);
       console.log(message);
       const messageString = JSON.stringify({

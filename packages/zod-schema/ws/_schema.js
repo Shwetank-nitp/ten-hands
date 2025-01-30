@@ -6,7 +6,8 @@ export const wsRequestSchema = z.object({
   message: z
     .object({
       type: z.string(),
-      pos: z.any(),
+      color: z.string(),
+      params: z.any(),
     })
     .optional(),
 });

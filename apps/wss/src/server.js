@@ -14,7 +14,7 @@ dotenv.config({
   path: "./.env",
 });
 
-await connectDb().then(() => console.log("database connected"));
+// await connectDb().then(() => console.log("database connected"));
 
 const roomManager = new RoomManager();
 
@@ -22,12 +22,8 @@ const wss = new WebSocketServer({ port: process.env.PORT });
 
 wss.on("connection", async (ws, req) => {
   try {
-    const token = new URL(
-      req.url,
-      `http://${req.headers.host}`
-    ).searchParams.get("token");
+    const token = req.url.split("/")[1];
     if (!token) return ws.close(4001, "Authentication token required");
-
     const userId = checkToken(token);
     if (!userId) return ws.close(4002, "Invalid token");
 
@@ -74,7 +70,10 @@ wss.on("connection", async (ws, req) => {
       }
     });
 
-    ws.on("close", () => roomManager.cleanUp(userId));
+    ws.on("close", () => {
+      console.log("webscoket closed");
+      roomManager.cleanUp(userId);
+    });
     ws.on("error", (error) => {
       console.error("WebSocket error:", error);
       roomManager.cleanUp(userId);

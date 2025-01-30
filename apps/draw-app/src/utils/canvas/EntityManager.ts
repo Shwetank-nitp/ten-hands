@@ -6,16 +6,20 @@ export class EntintyManager {
   private entintyMap: Map<number, Shape>;
   private entityStack: Shape[];
   private socket: WebSocket;
-  constructor(socket: WebSocket) {
+  private roomId: number;
+  constructor(socket: WebSocket, roomId: number) {
     this.entintyMap = new Map();
     this.entityStack = [];
     this.socket = socket;
-    socket.onmessage = (message) => {
-      const { type, color, draw } = message.data;
+    this.roomId = roomId;
+    socket.onmessage = (brodcast) => {
+      console.log(brodcast.data);
+      const data = JSON.parse(brodcast.data);
+      const { type, color, params } = data.message;
       this.entintyMap.set(this.entintyMap.size, {
         type,
         color,
-        params: draw,
+        params,
       });
     };
   }
@@ -25,9 +29,9 @@ export class EntintyManager {
     this.entintyMap.set(size, data);
     this.socket.send(
       JSON.stringify({
-        type: data.type,
-        color: data.color,
-        draw: data.params,
+        type: "draw",
+        roomId: this.roomId,
+        message: data,
       })
     );
     return size;

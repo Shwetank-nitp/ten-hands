@@ -46,7 +46,7 @@ const Dashboard = ({
       const handleJoinAck = (message: MessageEvent) => {
         const parsed = JSON.parse(message.data);
         if (parsed.type === "sub_ack") {
-          router.push("/canvas/" + parsed.roomId);
+          router.push("room/canvas/" + parsed.roomId);
         }
       };
       socket.onmessage = handleJoinAck;

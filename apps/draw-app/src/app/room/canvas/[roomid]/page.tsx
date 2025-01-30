@@ -5,6 +5,7 @@ import { EntintyManager } from "@/utils/canvas/EntityManager";
 import { Painter } from "@/utils/canvas/Painter";
 import { useSocketContext } from "@/utils/contexts/webScoketContext";
 import { Circle, PencilIcon, Square } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const drawOptions = [
@@ -16,6 +17,8 @@ const drawOptions = [
 const colors = ["red", "white", "green"];
 
 export default function Canvas() {
+  const roomId = 3; // fix this later from params
+
   const [shape, setShape] = useState<"ovel" | "line" | "rect">("line");
   const [color, setColor] = useState(colors[0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,7 +27,10 @@ export default function Canvas() {
 
   useEffect(() => {
     if (socket && !loading) {
-      const manager = new EntintyManager(socket);
+      if (!Number(roomId)) {
+        console.log("error :", roomId, Number(roomId));
+      }
+      const manager = new EntintyManager(socket, Number(roomId));
       setManager(manager);
     }
   }, [socket, loading]);
