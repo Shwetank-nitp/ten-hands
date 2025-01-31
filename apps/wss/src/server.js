@@ -1,19 +1,15 @@
-// pnpm packages
 import { WebSocketServer } from "ws";
 import dotenv from "dotenv";
-
-//utils
 import { checkToken } from "./utils/check-token.js";
-
-// worksapce packages
 import { wsRequestSchema } from "@repo/zod-schema/ws";
 import { RoomManager } from "./utils/RoomManager.js";
+import { Chat } from "@repo/db/models/chat";
 
 dotenv.config({
   path: "./.env",
 });
 
-// await connectDb().then(() => console.log("database connected"));
+await connectDb().then(() => console.log("database connected"));
 
 const roomManager = new RoomManager();
 
@@ -57,6 +53,11 @@ wss.on("connection", async (ws, req) => {
             break;
 
           case "draw":
+            await Chat.create({
+              roomId: parsed.roomId,
+              userId: userId,
+              message: parsed.message,
+            });
             roomManager.broadcastToRoom(parsed.roomId, parsed.message, userId);
             break;
 
