@@ -4,6 +4,7 @@ import { checkToken } from "./utils/check-token.js";
 import { wsRequestSchema } from "@repo/zod-schema/ws";
 import { RoomManager } from "./utils/RoomManager.js";
 import { Chat } from "@repo/db/models/chat";
+import { connectDb } from "@repo/db/connectDb";
 
 dotenv.config({
   path: "./.env",

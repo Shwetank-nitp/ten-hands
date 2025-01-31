@@ -9,7 +9,8 @@ export default async function Room() {
   let rooms;
 
   try {
-    const res = await axios.get(`${HTTP_URL}/rooms`, {
+    const url = new URL("api/v1/user/rooms", HTTP_URL);
+    const res = await axios.get(url.toString(), {
       headers: {
         Authorization: token,
       },
@@ -17,7 +18,7 @@ export default async function Room() {
     rooms = res.data;
   } catch (error) {
     console.log(error);
-    return <div>Internal Server Error</div>; //  make is more this a seperate component
+    return <div>Internal Server Error</div>;
   }
 
   return (

@@ -6,11 +6,6 @@ export async function middleware(request: NextRequest) {
   const cookie = await cookies();
   const token = cookie.get("token");
   const pathname = request.nextUrl.pathname.split("/")[1];
-  console.log(
-    request.nextUrl.pathname,
-    " is trying to aceess with this token ",
-    token
-  );
   if ((pathname === "login" || pathname === "signup") && !token) {
     return NextResponse.next();
   } else if (pathname === "login" || pathname === "signup") {

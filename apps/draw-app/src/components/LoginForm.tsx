@@ -9,7 +9,6 @@ import axios from "axios";
 import { User, Lock } from "lucide-react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { HTTP_URL } from "../utils/configs/urls";
 import Link from "next/link";
 import { AuthContainer } from "./AuthContainer";
 import { Label } from "./ui/label";
@@ -46,7 +45,8 @@ export function LoginForm() {
   const onSubmit = async (data: LoginSchemaType) => {
     setLoading(true);
     try {
-      const res = await axios.post(`${HTTP_URL}/login`, data);
+      const url = new URL("/api/v1/login", "http://localhost:8000");
+      const res = await axios.post(url.toString(), data);
       Cookies.set("token", res.data);
       router.replace("/room");
     } catch (error) {

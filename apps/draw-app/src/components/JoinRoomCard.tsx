@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSocketContext } from "@/utils/contexts/webScoketContext";
+import { HTTP_URL } from "@/utils/configs/urls";
+import axios, { AxiosError } from "axios";
+import Cookies from "js-cookie";
 
 const MotionCard = motion.create(Card);
 
@@ -26,14 +29,33 @@ export function JoinRoomCard({ open, setOpen }: JoinRoomCardProps) {
     e.preventDefault();
     e.stopPropagation();
     setLoading(true);
+
     const roomId = Number(id);
-    if (socket && roomId) {
-      socket.send(
-        JSON.stringify({
-          type: "sub_room",
-          roomId: roomId,
-        })
+
+    const url = new URL("/api/v1/check/" + roomId, HTTP_URL);
+    try {
+      await axios.get(url.toString(), {
+        headers: {
+          Authorization: `${Cookies.get("token")}`,
+        },
+      });
+      if (socket && roomId) {
+        socket.send(
+          JSON.stringify({
+            type: "sub_room",
+            roomId: roomId,
+          })
+        );
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.log(error);
+      setError(
+        axiosError.status === 404
+          ? "Room Not Found 🛑"
+          : "Somthing went wrong 💀"
       );
+      setLoading(false);
     }
   };
 
@@ -86,7 +108,7 @@ export function JoinRoomCard({ open, setOpen }: JoinRoomCardProps) {
               </span>
             </div>
             <Button onClick={handleJoinClick} disabled={loading}>
-              {loading ? "Joining..." : "Create"}
+              {loading ? "Joining..." : "Join"}
             </Button>
           </MotionCard>
         </div>

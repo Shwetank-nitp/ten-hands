@@ -90,6 +90,7 @@ export function IsRoomAvalable(req, res) {
     });
     if (!info) {
       res.status(404).send("room not found");
+      return;
     }
     res.status(200).send("room found");
   });

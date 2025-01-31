@@ -35,17 +35,16 @@ export function CreateRoomCard({ open, setOpen }: CreateRoomCardProps) {
     }
 
     try {
-      const response = await axios.post(
-        `${HTTP_URL}/create-room`,
-        { roomName: name }, // Request body
+      const url = new URL("api/v1/room/create", HTTP_URL);
+      await axios.post(
+        url.toString(),
+        { roomName: name },
         {
           headers: {
             Authorization: `${token}`,
           },
         }
       );
-
-      console.log("Room created:", response.data);
       setOpen(false);
       router.replace("/room");
     } catch (error) {

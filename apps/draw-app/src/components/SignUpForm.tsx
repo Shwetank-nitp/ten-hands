@@ -11,6 +11,8 @@ import { Crosshair, Lock, User } from "lucide-react";
 import { AuthInputField } from "./ui/input";
 import { Button } from "@repo/ui/button";
 import Link from "next/link";
+import axios from "axios";
+import { HTTP_URL } from "@/utils/configs/urls";
 
 const signupSchema = z.object({
   username: z
@@ -46,14 +48,13 @@ export const SignUpForm = () => {
   const onSubmit = async (data: SignupSchemaType) => {
     setLoading(true);
     try {
-      setTimeout(() => {
-        setLoading(false);
-        console.log(data);
-      }, 1000);
+      const url = new URL("api/v1/signup", HTTP_URL);
+      await axios.post(url.toString(), data);
+      router.replace("/room");
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      //setLoading(false);
+      setLoading(false);
     }
   };
 
