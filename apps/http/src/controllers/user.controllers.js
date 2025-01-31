@@ -3,6 +3,7 @@ import { errorHandler } from "../utils/errorhandler.js";
 import { zodErrorMessage } from "../utils/zod-error-message.js";
 import { User } from "@repo/db/models/user";
 import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "@repo/backend-common/config";
 
 export async function Signup(req, res) {
   errorHandler(req, res, async (req, res) => {

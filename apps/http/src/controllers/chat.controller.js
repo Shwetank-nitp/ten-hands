@@ -1,7 +1,7 @@
 import { Chat } from "@repo/db/models/chat";
 import { errorHandler } from "../utils/errorhandler.js";
 
-export function GetRoomDrawings() {
+export function GetRoomDrawings(req, res) {
   errorHandler(req, res, async (req, res) => {
     const { roomId } = req.params;
     const chats = await Chat.aggregate([
