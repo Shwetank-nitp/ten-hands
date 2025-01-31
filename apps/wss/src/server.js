@@ -7,7 +7,6 @@ import { checkToken } from "./utils/check-token.js";
 
 // worksapce packages
 import { wsRequestSchema } from "@repo/zod-schema/ws";
-import { connectDb } from "@repo/db/connectDb";
 import { RoomManager } from "./utils/RoomManager.js";
 
 dotenv.config({

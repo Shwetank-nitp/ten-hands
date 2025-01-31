@@ -97,6 +97,8 @@ export class Painter {
   private manager: EntintyManager;
   private canvas: HTMLCanvasElement;
   private color: string;
+  private socket: WebSocket;
+  private roomId: number;
 
   // Store event listeners so they can be removed later
   private mouseDownListener: ((e: MouseEvent) => void) | null = null;
@@ -109,12 +111,16 @@ export class Painter {
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     manager: EntintyManager,
-    color: string
+    color: string,
+    socket: WebSocket,
+    roomId: number
   ) {
     this.ctx = ctx;
     this.manager = manager;
     this.canvas = canvas;
     this.color = color;
+    this.socket = socket;
+    this.roomId = roomId;
   }
 
   observeRect() {
@@ -129,11 +135,19 @@ export class Painter {
 
     this.mouseUpListener = () => {
       clicked = false;
-      this.manager.addEntity({
-        type: "rect",
+      const data = {
+        type: "rect" as "rect",
         params: rect.getParams(),
         color: this.color,
-      });
+      };
+      this.manager.addEntity(data);
+      this.socket.send(
+        JSON.stringify({
+          type: "draw",
+          message: data,
+          roomId: this.roomId,
+        })
+      );
       this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       this.paintAll();
       rect.resetParams();
@@ -168,11 +182,19 @@ export class Painter {
 
     this.mouseUpListener = () => {
       clicked = false;
-      this.manager.addEntity({
-        type: "oval",
+      const data = {
+        type: "oval" as "oval",
         params: oval.getParams(),
         color: this.color,
-      });
+      };
+      this.manager.addEntity(data);
+      this.socket.send(
+        JSON.stringify({
+          type: "draw",
+          message: data,
+          roomId: this.roomId,
+        })
+      );
       this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       this.paintAll();
       oval.resetParams();
@@ -225,11 +247,19 @@ export class Painter {
     this.mouseUpListener = () => {
       if (clicked) {
         clicked = false;
-        this.manager.addEntity({
-          type: "line",
+        const data = {
+          type: "line" as "line",
           params: line.getParams(),
           color: this.color,
-        });
+        };
+        this.manager.addEntity(data);
+        this.socket.send(
+          JSON.stringify({
+            type: "draw",
+            roomId: this.roomId,
+            message: data,
+          })
+        );
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         line.resetParams();
         this.paintAll();
@@ -258,6 +288,18 @@ export class Painter {
   }
 
   startObserving(type: "rect" | "ovel" | "line") {
+    this.socket.onmessage = (brodcast) => {
+      const data = JSON.parse(brodcast.data);
+      console.log(data.message);
+      const { type, color, params } = data.message;
+      this.manager.addEntity({
+        type,
+        color,
+        params,
+      });
+      this.paintAll();
+    };
+
     this.paintAll();
 
     this.resizeListener = () => {

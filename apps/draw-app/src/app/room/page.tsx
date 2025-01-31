@@ -17,7 +17,7 @@ export default async function Room() {
     rooms = res.data;
   } catch (error) {
     console.log(error);
-    return <div>Internal Server Error</div>;
+    return <div>Internal Server Error</div>; //  make is more this a seperate component
   }
 
   return (

@@ -23,7 +23,7 @@ export function ToolBar({
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-md fixed z-30 top-5 left-1/2 origin-center flex gap-4 bg-slate-800/70 py-2 px-6 overflow-hidden"
+      className="rounded-md fixed z-30 top-5 left-[40%] flex gap-4 bg-slate-800/70 py-2 px-6 overflow-hidden"
     >
       {drawOptions.map((item) => (
         <button

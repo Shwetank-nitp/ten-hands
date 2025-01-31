@@ -5,7 +5,7 @@ import { EntintyManager } from "@/utils/canvas/EntityManager";
 import { Painter } from "@/utils/canvas/Painter";
 import { useSocketContext } from "@/utils/contexts/webScoketContext";
 import { Circle, PencilIcon, Square } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const drawOptions = [
@@ -17,23 +17,22 @@ const drawOptions = [
 const colors = ["red", "white", "green"];
 
 export default function Canvas() {
-  const roomId = 3; // fix this later from params
+  const { roomId } = useParams();
+  
+  if (!roomId) {
+    return <div>No Room ID is found!</div>;
+  }
 
   const [shape, setShape] = useState<"ovel" | "line" | "rect">("line");
   const [color, setColor] = useState(colors[0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { socket, loading } = useSocketContext();
+  const { socket } = useSocketContext();
   const [manager, setManager] = useState<EntintyManager>();
 
   useEffect(() => {
-    if (socket && !loading) {
-      if (!Number(roomId)) {
-        console.log("error :", roomId, Number(roomId));
-      }
-      const manager = new EntintyManager(socket, Number(roomId));
-      setManager(manager);
-    }
-  }, [socket, loading]);
+    const manager = new EntintyManager();
+    setManager(manager);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -45,16 +44,22 @@ export default function Canvas() {
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
 
-    if (manager) {
-      // draw logic here
-      const painter = new Painter(ctx, canvas, manager, color);
+    if (manager && socket) {
+      const painter = new Painter(
+        ctx,
+        canvas,
+        manager,
+        color,
+        socket,
+        Number(roomId)
+      );
 
       painter.startObserving(shape);
       return () => {
         painter.stopObserving();
       };
     }
-  }, [shape, color, manager]);
+  }, [shape, color, manager, socket]);
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black">
