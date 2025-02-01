@@ -10,7 +10,7 @@ import { CreateRoomCard } from "./CreateRoomCard";
 import { useSocketContext } from "@/utils/contexts/webScoketContext";
 import { useRouter } from "next/navigation";
 import { JoinRoomCard } from "./JoinRoomCard";
-import { InternalServerError } from "./info";
+import { Info } from "./info";
 import { Loading } from "./Loading";
 
 interface RoomDashboardProps {
@@ -128,7 +128,18 @@ export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
   const { socket, loading, error } = useSocketContext();
 
   if (error) {
-    return <InternalServerError />;
+    return (
+      <Info
+        title="Internal Server Error"
+        disc={
+          <span>
+            We're experiencing technical difficulties.
+            <br /> Our team has been notified and is working to resolve the
+            issue.
+          </span>
+        }
+      />
+    );
   }
 
   if (loading) {
