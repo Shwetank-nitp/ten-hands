@@ -1,3 +1,4 @@
+import { InternalServerError } from "@/components/500";
 import { RoomDashboard } from "@/components/RoomDashboard";
 import { HTTP_URL } from "@/utils/configs/urls";
 import axios from "axios";
@@ -18,7 +19,11 @@ export default async function Room() {
     rooms = res.data;
   } catch (error) {
     console.log(error);
-    return <div>Internal Server Error</div>;
+    return (
+      <div>
+        <InternalServerError />
+      </div>
+    );
   }
 
   return (

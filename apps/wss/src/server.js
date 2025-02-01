@@ -57,7 +57,7 @@ wss.on("connection", async (ws, req) => {
             await Chat.create({
               roomId: parsed.roomId,
               userId: userId,
-              message: parsed.message,
+              message: JSON.stringify(parsed.message),
             });
             roomManager.broadcastToRoom(parsed.roomId, parsed.message, userId);
             break;

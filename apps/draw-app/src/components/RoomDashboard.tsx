@@ -10,6 +10,8 @@ import { CreateRoomCard } from "./CreateRoomCard";
 import { useSocketContext } from "@/utils/contexts/webScoketContext";
 import { useRouter } from "next/navigation";
 import { JoinRoomCard } from "./JoinRoomCard";
+import { InternalServerError } from "./500";
+import { Loading } from "./Loading";
 
 interface RoomDashboardProps {
   rooms: {
@@ -126,16 +128,12 @@ export const RoomDashboard = ({ rooms }: RoomDashboardProps) => {
   const { socket, loading, error } = useSocketContext();
 
   if (error) {
-    return <p>Internal server error</p>;
+    return <InternalServerError />;
   }
 
-  return (
-    <>
-      {loading ? (
-        <p>Loading</p>
-      ) : (
-        socket && <Dashboard rooms={rooms} socket={socket} />
-      )}
-    </>
-  );
+  if (loading) {
+    return <Loading />;
+  }
+
+  return <>{socket && <Dashboard rooms={rooms} socket={socket} />}</>;
 };

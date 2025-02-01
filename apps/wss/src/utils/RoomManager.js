@@ -72,7 +72,7 @@ class RoomManager {
 
       recipients.forEach((userId) => {
         const ws = this.#userSockets.get(userId);
-        if (ws?.readyState === ws.OPEN) {
+        if (ws?.readyState === ws.OPEN && userId !== senderId) {
           ws.send(messageString);
         }
       });

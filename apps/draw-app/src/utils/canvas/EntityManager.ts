@@ -6,9 +6,10 @@ export class EntintyManager {
   private entintyMap: Map<number, Shape>;
   private entityStack: Shape[];
 
-  constructor() {
+  constructor(dbDrawrings: Shape[]) {
     this.entintyMap = new Map();
     this.entityStack = [];
+    dbDrawrings.forEach((drawing) => this.addEntity(drawing));
   }
 
   addEntity(data: Shape) {

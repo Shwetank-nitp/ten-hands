@@ -4,7 +4,7 @@ import { errorHandler } from "../utils/errorhandler.js";
 export function GetRoomDrawings(req, res) {
   errorHandler(req, res, async (req, res) => {
     const { roomId } = req.params;
-    const chats = await Chat.aggregate([
+    const query = await Chat.aggregate([
       {
         $match: {
           roomId: Number(roomId),
@@ -25,6 +25,11 @@ export function GetRoomDrawings(req, res) {
         },
       },
     ]);
-    res.send(chats);
+    res.send(
+      query[0] || {
+        chats: [],
+        total: 0,
+      }
+    );
   });
 }

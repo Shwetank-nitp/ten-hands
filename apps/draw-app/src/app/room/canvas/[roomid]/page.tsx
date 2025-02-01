@@ -3,10 +3,14 @@
 import { ToolBar } from "@/components/ToolBar";
 import { EntintyManager } from "@/utils/canvas/EntityManager";
 import { Painter } from "@/utils/canvas/Painter";
+import { HTTP_URL } from "@/utils/configs/urls";
 import { useSocketContext } from "@/utils/contexts/webScoketContext";
-import { Circle, PencilIcon, Square } from "lucide-react";
+import axios from "axios";
+import { Circle, Home, PencilIcon, Square } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import Cookies from "js-cookie";
+import { Shape } from "@/utils/canvas/common-types/canvas-util-class-common-types";
 
 const drawOptions = [
   { name: "line" as "line", shape: PencilIcon },
@@ -14,11 +18,20 @@ const drawOptions = [
   { name: "ovel" as "ovel", shape: Circle },
 ];
 
+type dbResponse = {
+  _id: string;
+  message: string;
+  roomId: number;
+  userId: string;
+  createdAt: string;
+};
+
 const colors = ["red", "white", "green"];
 
 export default function Canvas() {
   const { roomId } = useParams();
-  
+  const router = useRouter();
+
   if (!roomId) {
     return <div>No Room ID is found!</div>;
   }
@@ -30,8 +43,27 @@ export default function Canvas() {
   const [manager, setManager] = useState<EntintyManager>();
 
   useEffect(() => {
-    const manager = new EntintyManager();
-    setManager(manager);
+    const url = new URL("/api/v1/chats/" + roomId, HTTP_URL);
+    axios
+      .get(url.toString(), {
+        headers: {
+          Authorization: `${Cookies.get("token")}`,
+        },
+      })
+      .then((res) => {
+        const drawings = res.data.chats.map((item: dbResponse) => {
+          const obj = JSON.parse(item.message) as Shape;
+          return obj;
+        });
+        return drawings;
+      })
+      .then((drawings) => {
+        const manager = new EntintyManager(drawings);
+        setManager(manager);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   }, []);
 
   useEffect(() => {
@@ -63,6 +95,14 @@ export default function Canvas() {
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-black">
+      <div
+        className="fixed top-5 left-5 z-30 bg-slate-800/70 rounded-md p-2 cursor-pointer"
+        onClick={() => {
+          router.replace("/room");
+        }}
+      >
+        <Home className="text-slate-200" size={25} />
+      </div>
       <ToolBar
         setColor={setColor}
         currColor={color}
