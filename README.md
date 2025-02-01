@@ -1,4 +1,4 @@
-# Draw Application
+# CoSketch
 
 ## Summary
 
