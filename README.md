@@ -1,84 +1,127 @@
-# Turborepo starter
+# TurboRepo Project README
 
-This Turborepo starter is maintained by the Turborepo core team.
+## Summary
 
-## Using this example
+This project is a collaborative real-time drawing platform designed to bring people together for fun and creative activities. Built as a monorepo managed by [Turborepo](https://turbo.build/repo), it enables users to interact in a shared digital space, fostering collaboration and enjoyment through interactive drawing sessions. The repository contains three main applications (`draw-app`, `http`, and `wss`) located in the `apps` directory, along with a `packages` directory that houses shared packages used across these services.
 
-Run the following command:
+### Key Features
 
-```sh
-npx create-turbo@latest
-```
+- **Real-Time Collaboration**: Users can draw and interact simultaneously, making it an engaging platform for group activities.
+- **Modular Architecture**: Organized into distinct applications and shared packages for better code reusability and maintainability.
+- **Shared Packages**: Common utilities, configurations, and schemas are stored in the `packages` directory, ensuring consistency across all services.
+- **Efficient Build System**: Utilizes Turborepo's caching and parallelization capabilities to speed up build times and improve developer productivity.
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## Directory Structure
 
 ```
-cd my-turborepo
-pnpm build
+.
+├── .turbo/
+├── .vscode/
+├── apps/
+│   ├── draw-app/
+│   ├── http/
+│   ├── wss/
+├── node_modules/
+├── packages/
+│   ├── backend-common/
+│   ├── db/
+│   ├── eslint-config/
+│   ├── typescript-config/
+│   ├── ui/
+│   └── zod-schema/
+├── .gitignore
+├── .npmrc
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── README.md
+└── turbo.json
 ```
 
-### Develop
+## Guide to Install and Setup Locally
 
-To develop all apps and packages, run the following command:
+### Prerequisites
 
-```
-cd my-turborepo
-pnpm dev
-```
+Before you begin, ensure you have the following installed on your machine:
 
-### Remote Caching
+- Node.js (v19 or later)
+- pnpm (required)
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### Step 1: Clone the Repository
 
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+```bash
+git clone https://github.com/Shwetank-nitp/ten-hands.git
+cd ten-hands
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### Step 2: Install Dependencies
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+We recommend using pnpm for managing dependencies due to its performance benefits and compatibility with Turborepo.
 
+run this command on the root directory
+
+```bash
+pnpm install
 ```
-npx turbo link
+
+### Step 3: Configure Environment Variables and Config Variables
+
+Each application may require specific environment variables. Create `.env` files in the respective application directories (`apps/http`, `apps/wss`) and configure them according to the application's requirements.
+
+please follow the sample.env.local in (`apps/http`, `apps/wss`) for better claity.
+
+Example `.env` file:
+
+```plaintext
+PORT=3000
+DATABASE_URL=your-database-url
 ```
 
-## Useful Links
+in draw-app service go to `apps/draw-app/src/configs/urls.ts` and make sure match the base urls of backend with there PORT number you initialized in the .env file
 
-Learn more about the power of Turborepo:
+### Step 4: Start the Applications
 
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+To start all applications and their dependencies, run the following command:
+
+```bash
+pnpm run dev
+```
+
+or
+
+```bash
+npm run dev
+```
+
+This command will leverage Turborepo's capabilities to efficiently build and start all services.
+
+### Step 5: Development Workflow
+
+During development, you can use Turborepo's built-in commands to manage tasks such as building, testing, and linting.
+
+#### Build All Applications
+
+```bash
+pnpm run build
+```
+
+#### Run Tests
+
+```bash
+pnpm run test
+```
+
+#### Lint Code
+
+```bash
+pnpm run lint
+```
+
+### Additional Tips
+
+- **Code Sharing**: When adding new shared packages, make sure they are properly versioned and referenced in the `package.json` files of the applications that use them.
+- **Performance Optimization**: Take advantage of Turborepo's caching mechanism to minimize rebuild times during development.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
