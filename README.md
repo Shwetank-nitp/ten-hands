@@ -2,7 +2,7 @@
 
 ## Summary
 
-This project is a collaborative real-time drawing platform designed to bring people together for fun and creative activities. Built as a monorepo managed by [Turborepo](https://turbo.build/repo), it enables users to interact in a shared digital space, fostering collaboration and enjoyment through interactive drawing sessions. The repository contains three main applications (`draw-app`, `http`, and `wss`) located in the `apps` directory, along with a `packages` directory that houses shared packages used across these services.
+This project is a collaborative real-time drawing platform designed to bring people together for fun and creative activities. Built as a monorepo managed by [Turborepo](https://turbo.build/repo), it enables users to interact in a shared digital space, fostering collaboration and enjoyment through interactive drawing sessions. The repository contains three main applications (`CoSketch`, `http`, and `wss`) located in the `apps` directory, along with a `packages` directory that houses shared packages used across these services.
 
 ### Key Features
 
@@ -18,7 +18,7 @@ This project is a collaborative real-time drawing platform designed to bring peo
 ├── .turbo/
 ├── .vscode/
 ├── apps/
-│   ├── draw-app/
+│   ├── CoSketch/
 │   ├── http/
 │   ├── wss/
 ├── node_modules/
@@ -77,7 +77,7 @@ PORT=3000
 DATABASE_URL=your-database-url
 ```
 
-in draw-app service go to `apps/draw-app/src/configs/urls.ts` and make sure match the base urls of backend with there PORT number you initialized in the .env file
+in CoSketch service go to `apps/CoSketch/src/configs/urls.ts` and make sure match the base urls of backend with there PORT number you initialized in the .env file
 
 ### Step 4: Start the Applications
 
