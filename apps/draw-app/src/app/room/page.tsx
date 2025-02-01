@@ -1,4 +1,4 @@
-import { InternalServerError } from "@/components/500";
+import { Info } from "@/components/info";
 import { RoomDashboard } from "@/components/RoomDashboard";
 import { HTTP_URL } from "@/utils/configs/urls";
 import axios from "axios";
@@ -21,7 +21,16 @@ export default async function Room() {
     console.log(error);
     return (
       <div>
-        <InternalServerError />
+        <Info
+          title="Internal Server Error"
+          disc={
+            <span>
+              We're experiencing technical difficulties.
+              <br /> Our team has been notified and is working to resolve the
+              issue.
+            </span>
+          }
+        />
       </div>
     );
   }

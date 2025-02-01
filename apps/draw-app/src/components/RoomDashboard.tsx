@@ -10,7 +10,7 @@ import { CreateRoomCard } from "./CreateRoomCard";
 import { useSocketContext } from "@/utils/contexts/webScoketContext";
 import { useRouter } from "next/navigation";
 import { JoinRoomCard } from "./JoinRoomCard";
-import { InternalServerError } from "./500";
+import { InternalServerError } from "./info";
 import { Loading } from "./Loading";
 
 interface RoomDashboardProps {

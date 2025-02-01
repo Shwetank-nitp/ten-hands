@@ -11,6 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { Shape } from "@/utils/canvas/common-types/canvas-util-class-common-types";
+import { Info } from "@/components/info";
 
 const drawOptions = [
   { name: "line" as "line", shape: PencilIcon },
@@ -32,8 +33,8 @@ export default function Canvas() {
   const { roomId } = useParams();
   const router = useRouter();
 
-  if (!roomId) {
-    return <div>No Room ID is found!</div>;
+  if (!roomId || isNaN(Number(roomId))) {
+    return <Info title="Error" disc={<span>No Room ID is found!</span>} />;
   }
 
   const [shape, setShape] = useState<"ovel" | "line" | "rect">("line");
