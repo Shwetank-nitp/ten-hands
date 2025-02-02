@@ -52,14 +52,15 @@ export default function Canvas() {
         },
       })
       .then((res) => {
-        const drawings = res.data.chats.map((item: dbResponse) => {
-          const obj = JSON.parse(item.message) as Shape;
-          return obj;
+        const userId = res.data.clientId;
+        const entitys = res.data.chats.map((item: dbResponse) => {
+          const shape = JSON.parse(item.message) as Shape;
+          return { _id: item._id, shape, senderId: item.userId };
         });
-        return drawings;
+        return { entitys, userId };
       })
-      .then((drawings) => {
-        const manager = new EntintyManager(drawings);
+      .then(({ userId, entitys }) => {
+        const manager = new EntintyManager(entitys, userId);
         setManager(manager);
       })
       .catch((e) => {
@@ -88,6 +89,7 @@ export default function Canvas() {
       );
 
       painter.startObserving(shape);
+      painter.startListning();
       return () => {
         painter.stopObserving();
       };

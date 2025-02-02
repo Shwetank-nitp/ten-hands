@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const wsRequestSchema = z.object({
-  type: z.enum(["sub_room", "unsub_room", "draw"]),
+  type: z.enum(["sub_room", "unsub_room", "draw", "del"]),
   roomId: z.number(),
   message: z
     .object({
@@ -10,4 +10,5 @@ export const wsRequestSchema = z.object({
       params: z.any(),
     })
     .optional(),
+  shapeId: z.optional(z.string()),
 });

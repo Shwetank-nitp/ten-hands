@@ -54,14 +54,23 @@ wss.on("connection", async (ws, req) => {
             break;
 
           case "draw":
-            await Chat.create({
+            const { _id } = await Chat.create({
               roomId: parsed.roomId,
               userId: userId,
               message: JSON.stringify(parsed.message),
             });
-            roomManager.broadcastToRoom(parsed.roomId, parsed.message, userId);
+            roomManager.broadcastToRoom(
+              parsed.roomId,
+              parsed.message,
+              userId,
+              _id
+            );
             break;
-
+          case "del":
+            const shapeId = parsed.shapeId;
+            const deleteDraw = await Chat.findByIdAndDelete(shapeId);
+            console.log(deleteDraw);
+            roomManager.brodcastDeletion(shapeId, parsed.roomId, userId);
           default:
             ws.send(JSON.stringify({ error: "Unknown message type" }));
         }

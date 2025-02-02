@@ -60,19 +60,21 @@ class RoomManager {
     }
   }
 
-  broadcastToRoom(roomId, message, senderId) {
+  broadcastToRoom(roomId, message, senderId, _id) {
     try {
       if (!this.#roomSubscriptions.has(roomId)) return;
       const recipients = this.#roomSubscriptions.get(roomId);
       const messageString = JSON.stringify({
+        type: "add",
         message: { ...message },
         senderId,
         timestamp: new Date().toISOString(),
+        shapeId: _id,
       });
 
       recipients.forEach((userId) => {
         const ws = this.#userSockets.get(userId);
-        if (ws?.readyState === ws.OPEN && userId !== senderId) {
+        if (ws?.readyState === ws.OPEN) {
           ws.send(messageString);
         }
       });
@@ -80,6 +82,20 @@ class RoomManager {
       console.error(`Error broadcasting to room ${roomId}:`, error);
       throw error;
     }
+  }
+
+  brodcastDeletion(shapeId, roomId, senderId) {
+    const messageString = JSON.stringify({
+      type: "remove",
+      shapeId,
+      senderId,
+    });
+    this.#roomSubscriptions.get(roomId).forEach((userId) => {
+      const ws = this.#userSockets.get(userId);
+      if (ws?.readyState === ws.OPEN) {
+        ws.send(messageString);
+      }
+    });
   }
 }
 

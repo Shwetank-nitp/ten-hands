@@ -135,16 +135,15 @@ export class Painter {
 
     this.mouseUpListener = () => {
       clicked = false;
-      const data = {
+      const shape = {
         type: "rect" as "rect",
         params: rect.getParams(),
         color: this.color,
       };
-      this.manager.addEntity(data);
       this.socket.send(
         JSON.stringify({
           type: "draw",
-          message: data,
+          message: shape,
           roomId: this.roomId,
         })
       );
@@ -187,7 +186,6 @@ export class Painter {
         params: oval.getParams(),
         color: this.color,
       };
-      this.manager.addEntity(data);
       this.socket.send(
         JSON.stringify({
           type: "draw",
@@ -252,7 +250,6 @@ export class Painter {
           params: line.getParams(),
           color: this.color,
         };
-        this.manager.addEntity(data);
         this.socket.send(
           JSON.stringify({
             type: "draw",
@@ -287,21 +284,31 @@ export class Painter {
     this.canvas.addEventListener("mousemove", this.mouseMoveListener);
   }
 
-  startObserving(type: "rect" | "ovel" | "line") {
+  startListning() {
     this.socket.onmessage = (brodcast) => {
       const data = JSON.parse(brodcast.data);
-      console.log(data.message);
-      const { type, color, params } = data.message;
-      this.manager.addEntity({
-        type,
-        color,
-        params,
-      });
+      const { type, shapeId, senderId } = data;
+      if (type === "add") {
+        const { type: shapeType, color, params } = data.message;
+        this.manager.addEntity(
+          {
+            type: shapeType,
+            color,
+            params,
+          },
+          shapeId,
+          senderId
+        );
+      } else if (type === "remove") {
+        this.manager.deleteEntityById(shapeId, senderId);
+      }
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.paintAll();
     };
+  }
 
+  startObserving(type: "rect" | "ovel" | "line") {
     this.paintAll();
-
     this.resizeListener = () => {
       this.canvas.width = window.innerWidth;
       this.canvas.height = window.innerHeight;
@@ -318,13 +325,23 @@ export class Painter {
 
     this.keyDownListener = (e) => {
       if (e.key === "z" && e.ctrlKey) {
-        this.manager.undo();
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.paintAll();
+        const entity = this.manager.undo();
+        this.socket.send(
+          JSON.stringify({
+            type: "del",
+            roomId: this.roomId,
+            shapeId: entity?._id,
+          })
+        );
       } else if (e.key === "y" && e.ctrlKey) {
-        this.manager.redo();
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.paintAll();
+        const entity = this.manager.redo();
+        this.socket.send(
+          JSON.stringify({
+            type: "draw",
+            roomId: this.roomId,
+            message: entity?.shape,
+          })
+        );
       }
     };
 
@@ -391,6 +408,7 @@ export class Painter {
   }
 
   private paintAll() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     const shapes = this.manager.getEntentys();
     shapes.forEach((shape) => this.draw(shape));
   }
